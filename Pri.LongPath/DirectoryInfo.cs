@@ -216,12 +216,12 @@ namespace Pri.LongPath
 			return Directory.GetAccessControl(FullPath, includeSections);
 		}
 
-		public DirectoryInfo[] GetDirectories()
-		{
-			return Directory.GetDirectories(FullPath).Select(path => new DirectoryInfo(path)).ToArray();
-		}
+	    public DirectoryInfo[] GetDirectories()
+	    {
+	        return Directory.GetDirectories(FullPath).Select(path => new DirectoryInfo(path)).ToArray();
+	    }
 
-		public DirectoryInfo[] GetDirectories(string searchPattern)
+	    public DirectoryInfo[] GetDirectories(string searchPattern)
 		{
 			return Directory.GetDirectories(FullPath, searchPattern).Select(path => new DirectoryInfo(path)).ToArray();
 		}

@@ -67,3 +67,4 @@ UpgradeLog*.XML
 UpgradeLog*.htm
 /nuget/lib
 /nuget/*.nupkg
+packages/
