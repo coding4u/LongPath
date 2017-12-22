@@ -188,23 +188,12 @@ namespace Pri.LongPath
 				throw new ArgumentException("Invalid characters in path", "path");
 		}
 
-		private static bool HasIllegalCharacters(string path)
-		{
-#if NET_2_0
-			foreach (var e in path)
-			{
-				if (InvalidPathChars.Contains(e))
-				{
-					return true;
-				}
-			}
-			return false;
-#else
-			return path.Any(InvalidPathChars.Contains);
-#endif
-		}
+	    private static bool HasIllegalCharacters(string path)
+	    {
+	        return path.IndexOfAny(InvalidPathChars) > 0;
+	    }
 
-		public static string GetFileName(string path)
+	    public static string GetFileName(string path)
 		{
 			if (path == null) return null;
 			return System.IO.Path.GetFileName(Path.NormalizeLongPath(path));
