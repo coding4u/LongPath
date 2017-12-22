@@ -11,6 +11,7 @@ using System;
 using System.Text;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Security;
 using Microsoft.Win32.SafeHandles;
 
 using Path           = Pri.LongPath.Path;
@@ -395,12 +396,14 @@ namespace Pri.LongPath {
         }
 
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [SuppressUnmanagedCodeSecurity]
         private static extern bool DeviceIoControl(IntPtr hDevice, uint dwIoControlCode,
             IntPtr InBuffer, int nInBufferSize,
             IntPtr OutBuffer, int nOutBufferSize,
             out int pBytesReturned, IntPtr lpOverlapped);
 
         [DllImport("kernel32.dll", SetLastError = true)]
+        [SuppressUnmanagedCodeSecurity]
         private static extern IntPtr CreateFile(
             string lpFileName,
             EFileAccess dwDesiredAccess,

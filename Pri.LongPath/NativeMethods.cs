@@ -5,6 +5,7 @@ using Microsoft.Win32.SafeHandles;
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 using DWORD=System.UInt32;
 using System.Runtime.ConstrainedExecution;
+using System.Security;
 using System.Security.Principal;
 
 namespace Pri.LongPath
@@ -124,45 +125,56 @@ namespace Pri.LongPath
 		}
 
 		[DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+		[SuppressUnmanagedCodeSecurity]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static extern bool CopyFile(string src, string dst, [MarshalAs(UnmanagedType.Bool)]bool failIfExists);
 
 		[DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto, BestFitMapping = false)]
+		[SuppressUnmanagedCodeSecurity]
 		internal static extern bool ReplaceFile(String replacedFileName, String replacementFileName, String backupFileName, int dwReplaceFlags, IntPtr lpExclude, IntPtr lpReserved);
 
 		[DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        [SuppressUnmanagedCodeSecurity]
 		internal static extern SafeFindHandle FindFirstFile(string lpFileName, out WIN32_FIND_DATA lpFindFileData);
 
 		[DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+		[SuppressUnmanagedCodeSecurity]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static extern bool FindNextFile(SafeFindHandle hFindFile, out WIN32_FIND_DATA lpFindFileData);
 
 		[DllImport("kernel32.dll", SetLastError = true)]
+		[SuppressUnmanagedCodeSecurity]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static extern bool FindClose(IntPtr hFindFile);
 
 		[DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+		[SuppressUnmanagedCodeSecurity]
 		internal static extern uint GetFullPathName(string lpFileName, uint nBufferLength,
 			StringBuilder lpBuffer, IntPtr mustBeNull);
 
 		[DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+		[SuppressUnmanagedCodeSecurity]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static extern bool DeleteFile(string lpFileName);
 
 		[DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+		[SuppressUnmanagedCodeSecurity]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static extern bool RemoveDirectory(string lpPathName);
 
 		[DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+		[SuppressUnmanagedCodeSecurity]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static extern bool CreateDirectory(string lpPathName,
 			IntPtr lpSecurityAttributes);
 
 		[DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+		[SuppressUnmanagedCodeSecurity]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static extern bool MoveFile(string lpPathNameFrom, string lpPathNameTo);
 
 		[DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+		[SuppressUnmanagedCodeSecurity]
 		internal static extern SafeFileHandle CreateFile(
 			string lpFileName,
 			EFileAccess dwDesiredAccess,
@@ -173,9 +185,11 @@ namespace Pri.LongPath
 			IntPtr hTemplateFile);
 
 		[DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+		[SuppressUnmanagedCodeSecurity]
 		internal static extern System.IO.FileAttributes GetFileAttributes(string lpFileName);
 
 		[DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+		[SuppressUnmanagedCodeSecurity]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static extern bool SetFileAttributes(string lpFileName, [MarshalAs(UnmanagedType.U4)]System.IO.FileAttributes dwFileAttributes);
 
@@ -189,15 +203,19 @@ namespace Pri.LongPath
 		}
 
 		[DllImport("kernel32.dll", EntryPoint = "SetFilePointer", SetLastError = true)]
+		[SuppressUnmanagedCodeSecurity]
 		internal static extern int SetFilePointerWin32(SafeFileHandle handle, int lo, ref int hi, int origin);
 
 		[DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+		[SuppressUnmanagedCodeSecurity]
 		internal static extern int FormatMessage(int dwFlags, IntPtr lpSource, int dwMessageId, int dwLanguageId, StringBuilder lpBuffer, int nSize, IntPtr va_list_arguments);
 
 		[DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Auto, BestFitMapping = false)]
+		[SuppressUnmanagedCodeSecurity]
 		internal static extern bool DecryptFile(String path, int reservedMustBeZero);
 
 		[DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Auto, BestFitMapping = false)]
+		[SuppressUnmanagedCodeSecurity]
 		internal static extern bool EncryptFile(String path);
 
 		public static string GetMessage(int errorCode)
@@ -234,16 +252,22 @@ namespace Pri.LongPath
 			internal uint ftTimeHigh;
 		}
 		[DllImport("kernel32.dll", SetLastError = true)]
+		[SuppressUnmanagedCodeSecurity]
 		internal static extern unsafe bool SetFileTime(SafeFileHandle hFile, FILE_TIME* creationTime,
 					FILE_TIME* lastAccessTime, FILE_TIME* lastWriteTime);
 
 		[DllImport("kernel32.dll", BestFitMapping = false, CharSet = CharSet.Auto, ExactSpelling = false, SetLastError = true)]
+		[SuppressUnmanagedCodeSecurity]
 		internal static extern bool GetFileAttributesEx(string name, int fileInfoLevel, ref WIN32_FILE_ATTRIBUTE_DATA lpFileInformation);
 
 		[DllImport("kernel32.dll", CharSet = CharSet.None, EntryPoint = "SetErrorMode", ExactSpelling = true)]
+		[SuppressUnmanagedCodeSecurity]
 		private static extern int SetErrorMode_VistaAndOlder(int newMode);
+
 		private static readonly Version ThreadErrorModeMinOsVersion = new Version(6, 1, 7600);
+
 		[DllImport("kernel32.dll", CharSet = CharSet.None, EntryPoint = "SetThreadErrorMode", ExactSpelling = false, SetLastError = true)]
+		[SuppressUnmanagedCodeSecurity]
 		private static extern bool SetErrorMode_Win7AndNewer(int newMode, out int oldMode);
 
 		internal static int SetErrorMode(int newMode)
@@ -263,6 +287,7 @@ namespace Pri.LongPath
 			SetLastError = true,
 			ExactSpelling = true,
 			CharSet = CharSet.Unicode)]
+		[SuppressUnmanagedCodeSecurity]
 		internal static extern DWORD GetSecurityInfoByName(
 			string name,
 			DWORD objectType,
@@ -280,6 +305,7 @@ namespace Pri.LongPath
 			 SetLastError = true,
 			 ExactSpelling = true,
 			 CharSet = CharSet.Unicode)]
+		[SuppressUnmanagedCodeSecurity]
 		internal static extern DWORD SetSecurityInfoByName(
 			string name,
 			DWORD objectType,
@@ -296,6 +322,7 @@ namespace Pri.LongPath
 			 SetLastError = true,
 			 ExactSpelling = true,
 			 CharSet = CharSet.Unicode)]
+		[SuppressUnmanagedCodeSecurity]
 		internal static extern DWORD SetSecurityInfoByHandle(
 			SafeHandle handle,
 			DWORD objectType,
@@ -304,6 +331,7 @@ namespace Pri.LongPath
 			byte[] group,
 			byte[] dacl,
 			byte[] sacl);
+
 		[DllImport(
 			 "advapi32.dll",
 			 EntryPoint = "GetSecurityDescriptorLength",
@@ -311,13 +339,16 @@ namespace Pri.LongPath
 			 SetLastError = true,
 			 ExactSpelling = true,
 			 CharSet = CharSet.Unicode)]
+		[SuppressUnmanagedCodeSecurity]
 		internal static extern DWORD GetSecurityDescriptorLength(
 			IntPtr byteArray);
 
 		[DllImport("kernel32.dll", SetLastError = true)]
+		[SuppressUnmanagedCodeSecurity]
 		internal static extern IntPtr LocalFree(IntPtr handle);
 
 		[DllImport("kernel32.dll", BestFitMapping = false, CharSet = CharSet.Auto, ExactSpelling = false, SetLastError = true)]
+		[SuppressUnmanagedCodeSecurity]
 		internal static extern bool SetCurrentDirectory(string path);
 		#region for Priviledge class
 
@@ -360,16 +391,13 @@ namespace Pri.LongPath
 		}
 
 
-		[DllImport(
-			 "kernel32.dll",
-			 SetLastError = true)]
+		[DllImport("kernel32.dll",SetLastError = true)]
+		[SuppressUnmanagedCodeSecurity]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		internal static extern bool CloseHandle(IntPtr handle);
 
-		[DllImport(
-			 "advapi32.dll",
-			 CharSet = CharSet.Unicode,
-			 SetLastError = true)]
+		[DllImport("advapi32.dll",CharSet = CharSet.Unicode,SetLastError = true)]
+		[SuppressUnmanagedCodeSecurity]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		internal static extern bool AdjustTokenPrivileges(
 			[In]     SafeTokenHandle TokenHandle,
@@ -379,19 +407,14 @@ namespace Pri.LongPath
 			[In, Out] ref TOKEN_PRIVILEGE PreviousState,
 			[In, Out] ref uint ReturnLength);
 
-		[DllImport(
-			 "advapi32.dll",
-			 CharSet = CharSet.Auto,
-			 SetLastError = true)]
+		[DllImport("advapi32.dll",CharSet = CharSet.Auto,SetLastError = true)]
+		[SuppressUnmanagedCodeSecurity]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		internal static extern
 		bool RevertToSelf();
 
-		[DllImport(
-			 "advapi32.dll",
-			 EntryPoint = "LookupPrivilegeValueW",
-			 CharSet = CharSet.Auto,
-			 SetLastError = true)]
+		[DllImport("advapi32.dll",EntryPoint = "LookupPrivilegeValueW",CharSet = CharSet.Auto,SetLastError = true)]
+		[SuppressUnmanagedCodeSecurity]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		internal static extern
 		bool LookupPrivilegeValue(
@@ -399,26 +422,19 @@ namespace Pri.LongPath
 			[In]     string lpName,
 			[In, Out] ref LUID Luid);
 
-		[DllImport(
-			 "kernel32.dll",
-			 CharSet = CharSet.Auto,
-			 SetLastError = true)]
+		[DllImport("kernel32.dll",CharSet = CharSet.Auto,SetLastError = true)]
+		[SuppressUnmanagedCodeSecurity]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		internal static extern
 		IntPtr GetCurrentProcess();
 
-		[DllImport(
-			 "kernel32.dll",
-			 CharSet = CharSet.Auto,
-			 SetLastError = true)]
+		[DllImport("kernel32.dll",CharSet = CharSet.Auto,SetLastError = true)]
+		[SuppressUnmanagedCodeSecurity]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		internal static extern
-			IntPtr GetCurrentThread();
+		internal static extern IntPtr GetCurrentThread();
 
-		[DllImport(
-			 "advapi32.dll",
-			 CharSet = CharSet.Unicode,
-			 SetLastError = true)]
+		[DllImport("advapi32.dll",CharSet = CharSet.Unicode,SetLastError = true)]
+		[SuppressUnmanagedCodeSecurity]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		internal static extern
 		bool OpenProcessToken(
@@ -426,10 +442,8 @@ namespace Pri.LongPath
 			[In]     TokenAccessLevels DesiredAccess,
 			[In, Out] ref SafeTokenHandle TokenHandle);
 
-		[DllImport
-			 ("advapi32.dll",
-			 CharSet = CharSet.Unicode,
-			 SetLastError = true)]
+		[DllImport("advapi32.dll",CharSet = CharSet.Unicode,SetLastError = true)]
+		[SuppressUnmanagedCodeSecurity]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		internal static extern
 		bool OpenThreadToken(
@@ -438,10 +452,8 @@ namespace Pri.LongPath
 			[In]     bool OpenAsSelf,
 			[In, Out] ref SafeTokenHandle TokenHandle);
 
-		[DllImport
-			("advapi32.dll",
-			 CharSet = CharSet.Unicode,
-			 SetLastError = true)]
+		[DllImport("advapi32.dll",CharSet = CharSet.Unicode,SetLastError = true)]
+		[SuppressUnmanagedCodeSecurity]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		internal static extern
 		bool DuplicateTokenEx(
@@ -452,10 +464,8 @@ namespace Pri.LongPath
 			[In]    TokenType TokenType,
 			[In, Out] ref SafeTokenHandle NewToken);
 
-		[DllImport
-			 ("advapi32.dll",
-			 CharSet = CharSet.Unicode,
-			 SetLastError = true)]
+		[DllImport("advapi32.dll",CharSet = CharSet.Unicode,SetLastError = true)]
+		[SuppressUnmanagedCodeSecurity]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		internal static extern
 		bool SetThreadToken(
