@@ -118,12 +118,12 @@ namespace Pri.LongPath
                 return normalizedPath;
             }
 
-            if (normalizedPath.StartsWith(UNCLongPathPrefix, StringComparison.InvariantCultureIgnoreCase))
-            {
-                return string.Format(@"\\{0}", normalizedPath.Substring(UNCLongPathPrefix.Length));
-            }
+		    if (normalizedPath.StartsWith(UNCLongPathPrefix, StringComparison.InvariantCultureIgnoreCase))
+		    {
+		        return @"\\" + normalizedPath.Substring(UNCLongPathPrefix.Length);
+		    }
 
-            return normalizedPath.Substring(LongPathPrefix.Length);
+		    return normalizedPath.Substring(LongPathPrefix.Length);
 		}
 
 		private static string AddLongPathPrefix(string path)
@@ -232,13 +232,13 @@ namespace Pri.LongPath
 		}
 
 	    private static int GetUncRootLength(string path)
-        {
-            var components = path.Split(new[] { DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
-            var root = string.Format(@"\\{0}\{1}\", components[0], components[1]);
+	    {
+	        var components = path.Split(new[] {DirectorySeparatorChar}, StringSplitOptions.RemoveEmptyEntries);
+	        var root = @"\\" + components[0] + @"\" + components[1] + @"\";
 	        return root.Length;
-        }
+	    }
 
-		internal static int GetRootLength(string path)
+	    internal static int GetRootLength(string path)
 		{
 			if (Common.IsPathUnc(path)) return GetUncRootLength(path);
 			path = Path	.GetFullPath(path);
