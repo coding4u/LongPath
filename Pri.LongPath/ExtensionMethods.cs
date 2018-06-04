@@ -3,6 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 
+#if NET_2_0
+
+
 namespace Pri.LongPath
 {
 	public static class ExtensionMethods
@@ -1203,3 +1206,6 @@ namespace Pri.LongPath
 	    }
     }
 }
+
+#endif
+

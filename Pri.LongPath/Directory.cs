@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.AccessControl;
+using log4net;
 #if !NET_2_0
 using System.Linq;
 #endif
@@ -17,6 +19,8 @@ namespace Pri.LongPath
 
 	public static class Directory
 	{
+        private static readonly ILog Log = LogManager.GetLogger(typeof(Directory));
+
 		internal static SafeFileHandle GetDirectoryHandle(string normalizedPath)
 		{
 			var handle = NativeMethods.CreateFile(normalizedPath,
@@ -62,25 +66,16 @@ namespace Pri.LongPath
 				var isDirectoryReparsePoint = (Common.GetAttributes(path) & reparseFlags) == reparseFlags;
 
 				if (isDirectoryReparsePoint) {
-					Delete(path);
-					return;
-				}
-			}
-			catch (System.IO.FileNotFoundException) {
-				// ignore: not there when we try to delete, it doesn't matter
-			}
 
-			if (recursive == false) 
-			{
-				Delete(path);
-				return;
-			}
+                    if(Log.IsDebugEnabled)
+				        Log.Debug($"recursive = {recursive}, Deleting ReparsePoint: {path}");
 
-			try
-			{
-				foreach (var file in EnumerateFileSystemEntries(path, "*", false, true, SearchOption.TopDirectoryOnly))
-				{
-					File.Delete(file);
+                    Delete(path);
+
+                    if (Log.IsDebugEnabled)
+                        Log.Debug($"recursive = {recursive}, Deleted ReparsePoint: {path}");
+
+                    return;
 				}
 			}
 			catch (System.IO.FileNotFoundException)
@@ -88,7 +83,45 @@ namespace Pri.LongPath
 				// ignore: not there when we try to delete, it doesn't matter
 			}
 
+			if (recursive == false) 
+			{
+                if (Log.IsDebugEnabled)
+                    Log.Debug($"recursive = false, deleting directory: {path}");
+
+                Delete(path);
+
+                if (Log.IsDebugEnabled)
+                    Log.Debug($"recursive = false, deleted directory: {path}");
+
+                return;
+            }
+
 			try
+			{
+				foreach (var file in EnumerateFileSystemEntries(path, "*", false, true, SearchOption.TopDirectoryOnly))
+				{
+                    // Remove file readonly attribute if present.
+				    var attributes = File.GetAttributes(path);
+				    if ((attributes & System.IO.FileAttributes.ReadOnly) == System.IO.FileAttributes.ReadOnly)
+				    {
+				        File.SetAttributes(path, attributes & ~System.IO.FileAttributes.ReadOnly);
+				    }
+
+                    if (Log.IsDebugEnabled)
+                        Log.Debug($"++++++++++++ Deleting file: {file}");
+
+                    File.Delete(file);
+
+                    if(Log.IsDebugEnabled)
+                        Log.Debug($"============ Deleted file: {file}");
+                }
+            }
+			catch (System.IO.FileNotFoundException)
+			{
+                // ignore: not there when we try to delete, it doesn't matter
+            }
+
+            try
 			{
 				foreach (var subPath in EnumerateFileSystemEntries(path, "*", true, false, SearchOption.TopDirectoryOnly))
 				{
@@ -97,18 +130,46 @@ namespace Pri.LongPath
 			}
 			catch (System.IO.FileNotFoundException)
 			{
-				// ignore: not there when we try to delete, it doesn't matter
-			}
+                // ignore: not there when we try to delete, it doesn't matter
+            }
 
-			try
-			{
-				Delete(path);
-			}
-			catch (System.IO.FileNotFoundException)
-			{
-				// ignore: not there when we try to delete, it doesn't matter
-			}
-		}
+		    try
+		    {
+		        if (Log.IsDebugEnabled)
+		            Log.Debug($"+++++++++++ Deleting Directory: {path}");
+
+		        Delete(path);
+
+		        if (Log.IsDebugEnabled)
+		            Log.Debug($"=========== Deleted Directory: {path}");
+		    }
+		    catch (System.IO.FileNotFoundException)
+		    {
+		        // ignore: not there when we try to delete, it doesn't matter
+		    }
+            catch (System.IO.IOException ex)
+            {
+                Log.Warn($" Error delete directory: {path}, IOException, retry", ex);
+
+                // backoff 50ms, then retry, the max retry count is 10. 
+                RetryHelper.RetryWithDelay(() =>
+                {
+                    Delete(path);
+                    return true;
+                }, 10, TimeSpan.FromMilliseconds(50));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Log.Warn($"Error delete directory: {path}, UnauthorizedAccessException, retry", ex);
+
+                // backoff 50ms, then retry, the max retry count is 10. 
+                RetryHelper.RetryWithDelay(() =>
+                {
+                    Delete(path);
+                    return true;
+                }, 10, TimeSpan.FromMilliseconds(50));
+            }
+        }
 
 		/// <summary>
 		///     Deletes the specified empty directory.
